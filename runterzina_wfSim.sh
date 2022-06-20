@@ -6,6 +6,8 @@
 function printHelp {
     echo " --> ERROR in input arguments "
     echo " [0] -d       : default"
+    echo " [0] -s       : single p.e. simulator"
+    echo " [0] -t       : test SiPM tree"
     echo " [0] -h       : print help"
 }
 
@@ -22,6 +24,16 @@ else
 	n_sig_pe=1
 	./runterzina_wfSim 0 $input_configuration_file $outputRootFileWith_wf $numberOfWaveformsToSim $rnd_seed $n_sig_pe
 	#./runterzina_wfSim 0 wfSim_Terzina.conf wfSim.root 10 `date +%N` 1
+    elif [ "$1" = "-s" ]; then
+	make clean; make;
+	input_configuration_file="wfSim_Terzina.conf"
+	outputRootFileWith_wf="wfSim.root"
+	numberOfWaveformsToSim=100000
+	rnd_seed=`date +%N`
+	./runterzina_wfSim 1 $input_configuration_file $outputRootFileWith_wf $numberOfWaveformsToSim $rnd_seed
+    elif [ "$1" = "-t" ]; then
+	make clean; make;
+	./runterzina_wfSim 2
     elif [ "$1" = "-h" ]; then
         printHelp
     else

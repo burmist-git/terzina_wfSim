@@ -116,6 +116,7 @@ void wfSim::afterpulse_sim(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID,
     //	     <<"a_net               "<<a_net<<std::endl
     //	     <<"ampl                "<<ampl<<std::endl;
     typeID = 2;
+    //probCorr = 1.0;
     simPE( pe_vec, tap, ampl, typeID, parentGenerationID, parentID, probCorr);
   }
 }

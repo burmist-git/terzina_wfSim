@@ -1,5 +1,7 @@
 *~
+.*~
 src/*~
 *.pdf
 obj
 *.root
+*.eps

@@ -33,7 +33,10 @@ printmakehelp_and_reminder: runterzina_wfSim.cpp Makefile
 obj/wfSim.o: src/wfSim.cpp src/wfSim.hh src/wfSimConfStr.hh
 	$(CXX) -c -o $@ $< $(CXXFLAGS) 
 
-runterzina_wfSim: runterzina_wfSim.cpp src/wfSimConfStr.hh obj/wfSim.o
+obj/sipmAvalancheTree.o: src/sipmAvalancheTree.cpp src/sipmAvalancheTree.hh 
+	$(CXX) -c -o $@ $< $(CXXFLAGS) 
+
+runterzina_wfSim: runterzina_wfSim.cpp src/wfSimConfStr.hh obj/wfSim.o obj/sipmAvalancheTree.o
 	$(CXX) -o $@ $^ $(CXXFLAGS)
 
 clean:

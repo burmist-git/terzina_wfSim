@@ -73,12 +73,12 @@ private:
   void crosstalk_sim(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
   void afterpulse_sim(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
   void print_pe_vec(const auto (&all_pe_vec));
-  
-private:
+
   TRandom3 *_rnd;
   TGraph *_gr_wf_tmpl;
   Double_t _t_max_ampl_wf_tmpl;
   wfSimConfStr *_wfConf;
+
 };
 
 #endif
