@@ -5,3 +5,16 @@ src/*~
 obj
 *.root
 *.eps
+wfData/
+wfData_csv/
+wf_for_sim/
+wf_for_sim_long.zip
+wf_for_sim_short.zip
+test.txt
+runterzina_wfSim
+fit_LEE
+_gr_wf.C
+generate_waveform_template_old.C
+gr_fft_abs.C
+grerr.C
+h1_tmp.C

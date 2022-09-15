@@ -51,8 +51,10 @@ sipmAvalancheTree::sipmAvalancheTree(const char* name, const char* title) : TH2P
   //
   m_verboseLevel = 0;
   m_nCircularPoints = 100;
-  m_window_H = 1090.0;
-  m_window_W = 810.0;
+  m_window_H = 1000.0;
+  m_window_W = 1000.0;
+  //m_window_H = 1090.0;
+  //m_window_W = 810.0;
   m_window_x0 = 0.0;
   m_window_y0 = 0.0;
   //
@@ -184,24 +186,44 @@ void sipmAvalancheTree::SetUpVerticesMap(){
   double phi_max = 360.0*TMath::Pi()/180.0;
   double dphi = (phi_max - phi_min)/(m_nCircularPoints - 1);
   double phi;
+  //elipse
+  //const int nG = 7;
+  //double r[nG] = {60, 40, 30, 20, 15, 10, 5};
+  //int nNodes[nG] = {(int)TMath::Power(2,0),
+  //		    (int)TMath::Power(2,1),
+  //		    (int)TMath::Power(2,2),
+  //		    (int)TMath::Power(2,3),
+  //		    (int)TMath::Power(2,4),
+  //		    (int)TMath::Power(2,5),
+  //		    (int)TMath::Power(2,6)};
+  //double pitch_x[nG] = {0, 200, 120, 80, 45, 25, 12.5};
+  //double pitch_y[nG] = { 0,
+  //			 0 + 200*1.3,
+  //			 0 + 200*1.3 + 150*1.3,
+  //			 0 + 200*1.3 + 150*1.3 + 130*1.3,
+  //			 0 + 200*1.3 + 150*1.3 + 130*1.3 + 120*1.3,
+  //			 0 + 200*1.3 + 150*1.3 + 130*1.3 + 120*1.3 + 90*1.3,
+  //			 0 + 200*1.3 + 150*1.3 + 130*1.3 + 120*1.3 + 90*1.3 + 55};
+  //TVector2 r0_global(0.0,450);
+  //circle
   const int nG = 7;
   double r[nG] = {60, 40, 30, 20, 15, 10, 5};
   int nNodes[nG] = {(int)TMath::Power(2,0),
-		    (int)TMath::Power(2,1),
-		    (int)TMath::Power(2,2),
-		    (int)TMath::Power(2,3),
-		    (int)TMath::Power(2,4),
-		    (int)TMath::Power(2,5),
-		    (int)TMath::Power(2,6)};
-  double pitch_x[nG] = {0, 200, 120, 80, 45, 25, 12.5};
+  		    (int)TMath::Power(2,1),
+  		    (int)TMath::Power(2,2),
+  		    (int)TMath::Power(2,3),
+  		    (int)TMath::Power(2,4),
+  		    (int)TMath::Power(2,5),
+  		    (int)TMath::Power(2,6)};
+  double pitch_x[nG] = {0, 300, 200, 100, 55, 29, 15};
   double pitch_y[nG] = { 0,
-			 0 + 200*1.3,
+  			 0 + 200*1.3,
 			 0 + 200*1.3 + 150*1.3,
-			 0 + 200*1.3 + 150*1.3 + 130*1.3,
-			 0 + 200*1.3 + 150*1.3 + 130*1.3 + 120*1.3,
-			 0 + 200*1.3 + 150*1.3 + 130*1.3 + 120*1.3 + 90*1.3,
-  			 0 + 200*1.3 + 150*1.3 + 130*1.3 + 120*1.3 + 90*1.3 + 55};
-  TVector2 r0_global(0.0,450);
+			 0 + 200*1.3 + 150*1.3 + 110*1.3,
+  			 0 + 200*1.3 + 150*1.3 + 110*1.3 + 100*1.3,
+  			 0 + 200*1.3 + 150*1.3 + 110*1.3 + 100*1.3 + 70*1.3,
+  			 0 + 200*1.3 + 150*1.3 + 110*1.3 + 100*1.3 + 70*1.3 + 40};
+  TVector2 r0_global(0.0,400);
   int nodesID = 0;
   for (int i = 0; i < nG; i++) {
     for (int k = 0; k < nNodes[i]; k++) {

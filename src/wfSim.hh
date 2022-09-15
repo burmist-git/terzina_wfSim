@@ -15,6 +15,7 @@ struct wfSimConfStr;
 class TString;
 class TRandom3;
 class TGraph;
+class TH1D;
 
 struct photoElectronInfo {
   Int_t photoelectronID;            // photo electron ID in the avalanche, first p.e. has ID = 0.
@@ -64,16 +65,18 @@ public :
 
 public :
   void getWF_tmpl(TString name);
-  //void gen_WF(TGraph *gr_wf, Double_t t0, TH1D *h1_time_dist, Int_t n_signals, wfSimConfStr *wfConf);
   void gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, unsigned int n_signals);
+  void gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, unsigned int n_signals, TH1D *h1_photon_time);
   void simPE(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
   const inline TGraph *getTemplate() {return _gr_wf_tmpl;}
+  void save_to_csv( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only);
   
 private:
   void crosstalk_sim(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
   void afterpulse_sim(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
   void print_pe_vec(const auto (&all_pe_vec));
-
+  double generateDistFromHist(TH1D *h1);
+  
   TRandom3 *_rnd;
   TGraph *_gr_wf_tmpl;
   Double_t _t_max_ampl_wf_tmpl;

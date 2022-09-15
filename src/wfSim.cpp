@@ -131,7 +131,114 @@ void wfSim::print_pe_vec(const auto (&all_pe_vec)){
   }
 }
 
-//void wfSim::gen_WF(TGraph *gr_wf, TH1D *h1_time_dist, Int_t n_signals, wfSimConfStr *wfConf){
+void wfSim::gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, unsigned int n_signals, TH1D *h1_photon_time){
+  //
+  Double_t dT = (_wfConf->SimEndTime - _wfConf->SimStartTime);
+  Double_t dT_s = dT*1.0e-9; 
+  //unsigned int n_noise = (Int_t)(TMath::Floor(dT_s*_wfConf->DCRrate)+1);
+  //Int_t n = (Int_t)(TMath::Floor(dT/_wfConf->SamplingTime)+1);
+  unsigned int n_noise = (Int_t)(TMath::Floor(dT_s*_wfConf->DCRrate));
+  Int_t n = (Int_t)(TMath::Floor(dT/_wfConf->SamplingTime));
+  //
+  Double_t first_pe_time;
+  Double_t first_pe_ampl;
+  Int_t parentID;
+  Int_t typeID;
+  Int_t parentGenerationID;
+  Double_t probabilityCorrectionFactor = 1.0;
+  //noise
+  std::vector<std::vector<photoElectronInfo>> all_pe_vec;
+  for(unsigned int i = 0; i<n_noise; i++){
+    std::vector<photoElectronInfo> pe_vec;
+    first_pe_time = _rnd->Uniform(_wfConf->SimEndTime,_wfConf->SimStartTime);
+    first_pe_ampl = _rnd->Gaus(_wfConf->single_p_e_ampl,_wfConf->SigmaGain);
+    parentGenerationID = -1;
+    parentID = -1;
+    typeID = 0;
+    simPE(pe_vec, first_pe_time, first_pe_ampl, typeID, parentGenerationID, parentID, probabilityCorrectionFactor);
+    all_pe_vec.push_back(pe_vec);
+  }
+  //print_pe_vec(all_pe_vec);
+  //signal
+  std::vector<std::vector<photoElectronInfo>> sig_pe_vec;
+  Double_t dT_shower;
+  //
+  for(unsigned int i = 0; i<n_signals; i++){
+    std::vector<photoElectronInfo> pe_vec;
+    dT_shower = generateDistFromHist(h1_photon_time);
+    //std::cout<<"dT_shower = "<<dT_shower<<std::endl;
+    first_pe_time = _wfConf->signal_t0 + dT_shower;
+    first_pe_ampl = _rnd->Gaus(_wfConf->single_p_e_ampl,_wfConf->SigmaGain);
+    parentGenerationID = -1;
+    parentID = -1;
+    typeID = 0;
+    simPE(pe_vec, first_pe_time, first_pe_ampl, typeID, parentGenerationID, parentID, probabilityCorrectionFactor);
+    sig_pe_vec.push_back(pe_vec);
+  }
+  //
+  //print_pe_vec(sig_pe_vec);
+  //  
+  Double_t t;
+  Double_t ampl;
+  Double_t ampl_p_signal;
+  Double_t ampl_signal;
+  Double_t electricNoise;
+  for(Int_t i = 0;i<n;i++){
+    //if(i%10000==0)
+    //std::cout<<i<<std::endl;
+    t = _wfConf->SimStartTime + _wfConf->SamplingTime*i;
+    ampl = 0.0;
+    ampl_p_signal = 0.0;
+    ampl_signal = 0.0;
+    //p.e. noise
+    for(unsigned int j = 0;j<all_pe_vec.size();j++){
+      for(unsigned int k = 0;k<all_pe_vec.at(j).size();k++){
+	if((t - all_pe_vec.at(j).at(k).time )>=0 && (t - all_pe_vec.at(j).at(k).time)<1000){
+    	  ampl += all_pe_vec.at(j).at(k).ampl*_gr_wf_tmpl->Eval(t - all_pe_vec.at(j).at(k).time);
+	}
+      }
+    }
+    ampl_p_signal = ampl;
+    //signal
+    for(unsigned int j = 0;j<sig_pe_vec.size();j++){
+      for(unsigned int k = 0;k<sig_pe_vec.at(j).size();k++){
+	if((t - sig_pe_vec.at(j).at(k).time )>=0 && (t - sig_pe_vec.at(j).at(k).time)<1000){   
+	  ampl_p_signal += sig_pe_vec.at(j).at(k).ampl*_gr_wf_tmpl->Eval(t - sig_pe_vec.at(j).at(k).time);
+	  ampl_signal += sig_pe_vec.at(j).at(k).ampl*_gr_wf_tmpl->Eval(t - sig_pe_vec.at(j).at(k).time);
+	}
+      }
+    }
+    //electric noise
+    electricNoise = _rnd->Gaus(_wfConf->ElectronicBaseine,_wfConf->ElectronicNoiseSigm);
+    ampl += electricNoise;
+    ampl_p_signal += electricNoise;
+    ampl_signal += electricNoise;
+    gr_wf->SetPoint(gr_wf->GetN(),t,ampl);
+    gr_wf_sig->SetPoint(gr_wf_sig->GetN(),t,ampl_p_signal);
+    gr_wf_sig_only->SetPoint(gr_wf_sig_only->GetN(),t,ampl_signal);
+  }
+}
+
+double wfSim::generateDistFromHist(TH1D *h1){
+  int nn = h1->GetNbinsX()+1;
+  int binI;
+  double val;
+  bool go = false;
+  double binL;
+  double binR;
+  while( go == false ){
+    binI = (int)_rnd->Uniform(1,nn);
+    val = h1->GetBinContent(binI);
+    if(val>=_rnd->Uniform()){
+      binL = h1->GetBinLowEdge(binI);
+      binR = binL + h1->GetBinWidth(binI);
+      go = true;
+      return _rnd->Uniform(binL,binR);
+    }
+  }
+  return -999.0;
+}
+
 void wfSim::gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, unsigned int n_signals){
   //
   Double_t dT = (_wfConf->SimEndTime - _wfConf->SimStartTime);
@@ -173,7 +280,7 @@ void wfSim::gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, un
     sig_pe_vec.push_back(pe_vec);
   }
   //
-  print_pe_vec(sig_pe_vec);
+  //print_pe_vec(sig_pe_vec);
   //  
   Double_t t;
   Double_t ampl;
@@ -214,4 +321,26 @@ void wfSim::gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, un
     gr_wf_sig->SetPoint(gr_wf_sig->GetN(),t,ampl_p_signal);
     gr_wf_sig_only->SetPoint(gr_wf_sig_only->GetN(),t,ampl_signal);
   }  
+}
+
+void wfSim::save_to_csv( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only){
+  Double_t t;
+  Double_t v_wf;
+  Double_t v_wf_all;
+  Double_t v_wf_sig;
+  TString csv_file_out=gr_wf->GetTitle();
+  csv_file_out += ".csv";
+  std::ofstream csvfile;
+  csvfile.open (csv_file_out.Data());
+  csvfile<<"time_ns,v_bkg,v_tot,v_sig"<<std::endl;
+  for(Int_t i = 0;i<gr_wf->GetN();i++){
+    gr_wf->GetPoint(i,t,v_wf);
+    gr_wf_sig->GetPoint(i,t,v_wf_all);
+    gr_wf_sig_only->GetPoint(i,t,v_wf_sig);
+    csvfile<<t
+	   <<","<<v_wf
+	   <<","<<v_wf_all
+	   <<","<<v_wf_sig<<std::endl;
+  }
+  csvfile.close();
 }

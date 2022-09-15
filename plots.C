@@ -17,9 +17,9 @@ Int_t plots(){
   fileN = "./wfSim.root";
   TFile *f1 = new TFile(fileN.Data());
   TGraph *_gr_wf_tmpl = (TGraph*)f1->Get("_gr_wf_tmpl");
-  TGraph *gr_wf = (TGraph*)f1->Get("gr_wf_0049");
-  TGraph *gr_wf_sig = (TGraph*)f1->Get("gr_wf_sig_0049");
-  TGraph *gr_wf_sig_only = (TGraph*)f1->Get("gr_wf_sig_only_0089");
+  TGraph *gr_wf = (TGraph*)f1->Get("gr_wf_0001");
+  TGraph *gr_wf_sig = (TGraph*)f1->Get("gr_wf_sig_0001");
+  TGraph *gr_wf_sig_only = (TGraph*)f1->Get("gr_wf_sig_only_0001");
   //TGraph *gr_wf_sig_only_01 = (TGraph*)f1->Get("gr_wf_sig_only_0094");
   //TGraph *gr_wf_sig_only_02 = (TGraph*)f1->Get("gr_wf_sig_only_0073");
   
@@ -79,9 +79,12 @@ Int_t plots(){
   gPad->SetGridy();
   //
   TMultiGraph *mg = new TMultiGraph();
-  mg->Add(gr_wf_sig);
-  mg->Add(gr_wf);
-  mg->Add(gr_wf_sig_only);
+  //mg->Add(gr_wf_sig);
+  //mg->Add(gr_wf);
+  //mg->Add(gr_wf_sig_only);
+  mg->Add(gr_wf_01);
+  //mg->Add(gr_wf_02);
+  //mg->Add(gr_wf_03);
   //mg->GetXaxis()->SetLimits(xMin,xMax);
   mg->Draw("APL");
   //mg->SetMinimum(0.0);

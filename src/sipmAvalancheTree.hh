@@ -14,8 +14,8 @@
 class sipmAvalancheTree: public TH2Poly {
  public:
 
-  ~sipmAvalancheTree() {};
   sipmAvalancheTree(const char* name, const char* title);
+  ~sipmAvalancheTree() {};
   void DrawHisto(TString opt = "ZCOLOT text same", TString outTreeFileName = "./theTree.pdf");
   void test();
   void test2();  
