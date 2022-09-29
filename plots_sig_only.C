@@ -79,7 +79,7 @@ Int_t plots_sig_only(){
   mg->Draw("APL");
   mg->GetXaxis()->SetTitle("time, ns");
   mg->GetYaxis()->SetTitle("Amplitude, single p.e.");
-  c1->SaveAs("sig_wf_sim_7km_4pe.pdf");
+  //c1->SaveAs("sig_wf_sim_7km_4pe.pdf");
   //c1->SaveAs("sig_wf_sim_15km_4pe.pdf");
   //c1->SaveAs("sig_wf_sim_25km_4pe.pdf");
   return 0;
