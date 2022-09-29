@@ -14,7 +14,8 @@ using namespace std;
 
 Int_t plots_sig_only(){
   TString fileN;
-  fileN = "./wfSim.root";
+  //fileN = "./wfSim.root";
+  fileN = "./wfSim_Terzina_25um_conv_fit_40MHz_filter_signal.root";
   TFile *f1 = new TFile(fileN.Data());
   TGraph *gr_wf_sig_only_01 = (TGraph*)f1->Get("gr_wf_sig_only_0000");
   TGraph *gr_wf_sig_only_02 = (TGraph*)f1->Get("gr_wf_sig_only_0001");
@@ -70,10 +71,10 @@ Int_t plots_sig_only(){
   mg->Add(gr_wf_sig_only_01);
   mg->Add(gr_wf_sig_only_02);
   mg->Add(gr_wf_sig_only_03);
-  //mg->Add(gr_wf_sig_only_04);
+  mg->Add(gr_wf_sig_only_04);
   //mg->Add(gr_wf_sig_only_05);
-  //mg->Add(gr_wf_sig_only_06);
-  //mg->GetXaxis()->SetRangeUser(4950,6000);
+  mg->Add(gr_wf_sig_only_06);
+  ///mg->GetXaxis()->SetRangeUser(4950,6000);
   //mg->GetYaxis()->SetRangeUser(-0.2,6.0);
   mg->Draw("APL");
   mg->GetXaxis()->SetTitle("time, ns");

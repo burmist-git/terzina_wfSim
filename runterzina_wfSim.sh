@@ -16,6 +16,7 @@ function printHelp {
     echo " [0] -LEE                   : generate LEE template (linear exp. exp. SiPM responce)"
     echo " [0] -LEEfit                : fit with LEE function"
     echo " [0] -FREQCUTOFF            : simulate frequency cut off preamp."
+    echo " [0] -genDistFromHist       : test GenerateDistFromHist"
     echo " [0] -h                     : print help"
 }
 
@@ -35,13 +36,24 @@ else
     elif [ "$1" = "-photTime" ]; then
 	make clean; make;
 	#input_configuration_file="wfSim_Terzina_25um_conv_fit_fullMHz_filter.conf"
+	#input_configuration_file="wfSim_Terzina_25um_conv_fit_fullMHz_filter.conf"
 	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_fullMHz_filter.root"
 	#input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_10MHz.conf"
 	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_10MHz.root"
 	#input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_20MHz.conf"
 	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_20MHz.root"
-	input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_30MHz.conf"
-	outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_30MHz.root"
+	#input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_30MHz.conf"
+	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_30MHz.root"
+	#input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_signal.conf"
+	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_signal.root"
+	#input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_10MHz_signal.conf"
+	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_10MHz_signal.root"
+	#input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_20MHz_signal.conf"
+	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_20MHz_signal.root"
+	#input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_30MHz_signal.conf"
+	#outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_30MHz_signal.root"
+	input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_signal.conf"
+	outputRootFileWith_wf="wfSim_Terzina_25um_conv_fit_40MHz_filter_signal.root"
 	numberOfWaveformsToSim=10
 	rnd_seed=`date +%N`
 	#
@@ -53,7 +65,7 @@ else
 	#trakInfoDescription="trkInfo_0000235.dat" # 15 km 350 PeV
 	#trakInfoDescription="trkInfo_0000701.dat"  # 25 km 750 PeV
 	#
-	n_sig_pe=0
+	n_sig_pe=7
 	./runterzina_wfSim 3 $input_configuration_file $outputRootFileWith_wf $numberOfWaveformsToSim $rnd_seed $n_sig_pe $inRootFileWithShower $trakInfoDescription
     elif [ "$1" = "-photTimescreenNUVfull" ]; then
 	make clean; make;
@@ -104,7 +116,6 @@ else
 	#
 	simpath="/home/dpncguest/home2/work/POEMMA/geant4/terzina_wfSim/"
 	numberOfWaveformsToSim_all=100
-
 	#
 	#
 	screenName='lee01'
@@ -385,6 +396,20 @@ else
 	#./runterzina_wfSim 6 ./wfData/linearExpExp_tau_210ns.txt linearExpExp_tau_210ns_fit_40MHz_filter.conf 40
 	#./runterzina_wfSim 6 ./wfData/linearExpExp_tau_230ns.txt linearExpExp_tau_230ns_fit_40MHz_filter.conf 40
 	./runterzina_wfSim 6 ./wfData/linearExpExp_tau_260ns.txt linearExpExp_tau_260ns_fit_40MHz_filter.conf 40
+    elif [ "$1" = "-genDistFromHist" ]; then
+	make clean; make;
+	input_configuration_file="wfSim_Terzina_25um_conv_fit_40MHz_filter_10MHz_signal.conf"
+	outputRootFileWith_wf="testGenerateDistFromHist.root"
+	numberOfWaveformsToSim=2
+	rnd_seed=`date +%N`
+	#inRootFileWithShower="./wfData_root/EASCherSim_0022360.ini.npz.root"  # 7 km 100 PeV
+	#trakInfoDescription="trkInfo_0022360.dat"                             # 7 km 100 PeV
+	inRootFileWithShower="./wfData_root/EASCherSim_0000235.ini.npz.root"   # 15 km 350 PeV
+	trakInfoDescription="trkInfo_0000235.dat"                              # 15 km 350 PeV
+	#inRootFileWithShower="./wfData_root/EASCherSim_0000701.ini.npz.root"  # 25 km 750 PeV
+	#trakInfoDescription="trkInfo_0000701.dat"                             # 25 km 750 PeV
+	n_sig_pe=7
+	./runterzina_wfSim 7 $input_configuration_file $outputRootFileWith_wf $numberOfWaveformsToSim $rnd_seed $n_sig_pe $inRootFileWithShower $trakInfoDescription
     elif [ "$1" = "-h" ]; then
         printHelp
     else

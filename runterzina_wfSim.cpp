@@ -29,6 +29,7 @@ void readDatTrkFile(TString fileName, Double_t &theta, Double_t &phi,
                     Double_t &distToEarth, Double_t &distToTerzina, Double_t &angleTrzinaTrk, Double_t &nphotons_per_m2);
 void readHistG4File( TString hist_fileName, TH1D *h1_photon_time, Double_t dist);
 void copyHistogram(TH1D *h1, TH1D *h1_copy, TString h1_name, TString h1_title, bool ifBinsOnly, double norm);
+void integrateHistogram(TH1D *h1, TH1D *h1_integral, bool normKey);
 
 int main(int argc, char *argv[]){
   //
@@ -354,6 +355,68 @@ int main(int argc, char *argv[]){
     gr_fft_im->Write();
     rootFile->Close();
   }
+  else if (argc == 9 && atoi(argv[1]) == 7) {
+    //
+    TString input_configuration_file = argv[2];
+    TString outputRootFileWith_wf = argv[3];
+    Int_t numberOfWaveformsToSim = atoi(argv[4]);
+    Int_t rnd_seed = atoi(argv[5]);
+    Int_t n_sig_pe = atoi(argv[6]);
+    TString inRootFileWithShower = argv[7];
+    TString trakInfoDescription = argv[8];
+    //
+    wfSimConfStr *wfConf = new wfSimConfStr();
+    wfConf->readFromFile(input_configuration_file);
+    wfConf->printInfo();
+    Double_t totalTime_in_s = (wfConf->SimEndTime - wfConf->SimStartTime)*numberOfWaveformsToSim*1.0e-9;
+    std::cout<<std::endl
+	     <<"input_configuration_file "<<input_configuration_file<<std::endl
+	     <<"outputRootFileWith_wf    "<<outputRootFileWith_wf<<std::endl
+	     <<"numberOfWaveformsToSim   "<<numberOfWaveformsToSim<<std::endl
+	     <<"rnd_seed                 "<<rnd_seed<<std::endl
+      	     <<"n_sig_pe                 "<<n_sig_pe<<std::endl
+    	     <<"inRootFileWithShower     "<<inRootFileWithShower<<std::endl
+    	     <<"trakInfoDescription      "<<trakInfoDescription<<std::endl;
+    //
+    Double_t theta, phi;
+    Double_t x_int, y_int, z_int;
+    Double_t xe0, ye0, ze0; 
+    Double_t distToEarth;
+    Double_t distToTerzina;
+    Double_t angleTrzinaTrk;
+    Double_t nphotons_per_m2;
+    //
+    readDatTrkFile(trakInfoDescription, theta, phi, 
+		   x_int, y_int, z_int, 
+		   xe0, ye0, ze0, 
+		   distToEarth, distToTerzina, angleTrzinaTrk, nphotons_per_m2);
+    std::cout<<"distToTerzina = "<<distToTerzina<<std::endl;
+    //
+    TH1D *h1_photon_time = new TH1D();
+    TH1D *h1_photon_time_test = new TH1D();
+    TH1D *h1_photon_time_integral = new TH1D();
+    readHistG4File( inRootFileWithShower, h1_photon_time, distToTerzina);
+    copyHistogram(h1_photon_time, h1_photon_time_test, "h1_photon_time_test", "h1_photon_time_test", true, 1.0);
+    copyHistogram(h1_photon_time, h1_photon_time_integral, "h1_photon_time_integral", "h1_photon_time_integral", true, 1.0);
+    integrateHistogram(h1_photon_time, h1_photon_time_integral, true);
+    TRandom3 *rnd = new TRandom3(rnd_seed);
+    wfSim *wf = new wfSim(rnd,wfConf);
+    wf->testGenerateDistFromHist(h1_photon_time,h1_photon_time_test);
+    ////////////////
+    TFile* rootFile = new TFile(outputRootFileWith_wf.Data(), "RECREATE", " Histograms", 1);
+    rootFile->cd();
+    if (rootFile->IsZombie()){
+      std::cout<<"  ERROR ---> file "<<outputRootFileWith_wf.Data()<<" is zombi"<<std::endl;
+      assert(0);
+    }
+    else {
+      std::cout<<"  Output Histos file ---> "<<outputRootFileWith_wf.Data()<<std::endl;
+    }
+    h1_photon_time->Write();
+    h1_photon_time_test->Write();
+    h1_photon_time_integral->Write();
+    rootFile->Close();
+  }
   else{
     std::cout<<"  runID [1] = 0 (Sig. + bkg.)             "<<std::endl
  	     <<"        [2] - input configuration file    "<<std::endl
@@ -385,6 +448,14 @@ int main(int argc, char *argv[]){
  	     <<"        [2] - initial waveform"<<std::endl
        	     <<"        [3] - input initial SiPM wf. configuration file "<<std::endl
       	     <<"        [4] - cut off frequency in MHz"<<std::endl;
+    std::cout<<"  runID [1] = 7 (test GenerateDistFromHist)"<<std::endl
+ 	     <<"        [2] - input configuration file    "<<std::endl
+	     <<"        [3] - output root file with wf.   "<<std::endl
+	     <<"        [4] - number of waveforms to sim. "<<std::endl
+	     <<"        [5] - seed                        "<<std::endl
+      	     <<"        [6] - number of signal p.e.       "<<std::endl
+	     <<"        [7] - in Root File With Shower    "<<std::endl
+      	     <<"        [8] - trk Info File               "<<std::endl;
   }  //
   finish = clock();
   std::cout<<"-------------------------"<<std::endl
@@ -451,4 +522,17 @@ void copyHistogram(TH1D *h1, TH1D *h1_copy, TString h1_name, TString h1_title, b
   if(!ifBinsOnly && norm>0.0)
     for(int i = 1;i<=nBins;i++)
       h1_copy->SetBinContent(i,h1->GetBinContent(i)/norm);
+}
+
+void integrateHistogram(TH1D *h1, TH1D *h1_integral, bool normKey){
+  int nBins = h1->GetNbinsX();
+  Double_t integralhist = 0; 
+  for(int i = 1;i<nBins;i++){
+    integralhist = h1->Integral(1,i+1);
+    h1_integral->SetBinContent(i,integralhist);
+  }
+  Double_t norm = h1_integral->GetMaximum();
+  if(normKey)
+    for(int i = 1;i<=nBins;i++)
+      h1_integral->SetBinContent(i,h1_integral->GetBinContent(i)/norm);
 }

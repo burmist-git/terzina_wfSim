@@ -265,6 +265,16 @@ void wfSim::gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, un
   }
 }
 
+void wfSim::testGenerateDistFromHist(TH1D *h1in, TH1D *h1out){
+  Int_t nn = 1000000;
+  for(Int_t i = 0;i<nn;i++){
+    h1out->Fill(generateDistFromHist(h1in));
+  }
+  Double_t norm = h1out->GetMaximum();
+  for(int i = 1;i<=h1out->GetNbinsX();i++)
+    h1out->SetBinContent(i,h1out->GetBinContent(i)/norm);
+}
+
 double wfSim::generateDistFromHist(TH1D *h1){
   int nn = h1->GetNbinsX()+1;
   int binI;
@@ -272,9 +282,12 @@ double wfSim::generateDistFromHist(TH1D *h1){
   bool go = false;
   double binL;
   double binR;
+  double t_min = h1->GetBinLowEdge(1);
+  double t_max = h1->GetBinLowEdge(nn);
   while( go == false ){
     binI = (int)_rnd->Uniform(1,nn);
-    val = h1->GetBinContent(binI);
+    //binI = h1->FindBin(_rnd->Uniform(t_min,t_max));
+    val  = h1->GetBinContent(binI);
     if(val>=_rnd->Uniform()){
       binL = h1->GetBinLowEdge(binI);
       binR = binL + h1->GetBinWidth(binI);
