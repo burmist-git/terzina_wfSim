@@ -185,7 +185,7 @@ int main(int argc, char *argv[]){
     wfSimConfStr *wfConf = new wfSimConfStr();
     wfConf->readFromFile(input_configuration_file);
     wfConf->printInfo();
-    //
+    Double_t totalTime_in_s = (wfConf->SimEndTime - wfConf->SimStartTime)*numberOfWaveformsToSim*1.0e-9;
     std::cout<<std::endl
 	     <<"input_configuration_file "<<input_configuration_file<<std::endl
 	     <<"outputRootFileWith_wf    "<<outputRootFileWith_wf<<std::endl
@@ -216,6 +216,11 @@ int main(int argc, char *argv[]){
     TRandom3 *rnd = new TRandom3(rnd_seed);
     wfSim *wf = new wfSim(rnd,wfConf);
     wf->getWF_tmpl(wfConf->Template);
+    TH1D *h1_ampl = new TH1D("h1_ampl","h1_ampl",1000,0.0,20.0); 
+    TH1D *h1_amplLocMax = new TH1D("h1_amplLocMax","h1_amplLocMax",1000,0.0,20.0); 
+    TGraph *gr_threshold_counter = new TGraph();
+    gr_threshold_counter->SetTitle("gr_threshold_counter");
+    gr_threshold_counter->SetName("gr_threshold_counter");
     ////////////////
     TFile* rootFile = new TFile(outputRootFileWith_wf.Data(), "RECREATE", " Histograms", 1);
     rootFile->cd();
@@ -230,6 +235,7 @@ int main(int argc, char *argv[]){
     for(Int_t i = 0;i<numberOfWaveformsToSim;i++){
       //std::cout<<i<<std::endl;
       TGraph *gr_wf = new TGraph();
+      TGraph *gr_wf_locMax = new TGraph();
       TGraph *gr_wf_sig = new TGraph();
       TGraph *gr_wf_sig_only = new TGraph();
       ////////////////
@@ -237,24 +243,35 @@ int main(int argc, char *argv[]){
       sprintf(buffer ,"%04d", i);
       TString wf_ID = buffer;
       TString gr_wf_name_title = "gr_wf_"; gr_wf_name_title += wf_ID;
+      TString gr_wf_locMax_name_title = "gr_wf_locMax_"; gr_wf_locMax_name_title += wf_ID;
       TString gr_wf_sig_name_title = "gr_wf_sig_"; gr_wf_sig_name_title += wf_ID;
       TString gr_wf_sig_only_name_title = "gr_wf_sig_only_"; gr_wf_sig_only_name_title += wf_ID;
       ////////////////
       gr_wf->SetTitle(gr_wf_name_title.Data());
       gr_wf->SetName(gr_wf_name_title.Data());
+      gr_wf_locMax->SetTitle(gr_wf_locMax_name_title.Data());
+      gr_wf_locMax->SetName(gr_wf_locMax_name_title.Data());
       gr_wf_sig->SetTitle(gr_wf_sig_name_title.Data());
       gr_wf_sig->SetName(gr_wf_sig_name_title.Data());
       gr_wf_sig_only->SetTitle(gr_wf_sig_only_name_title.Data());
       gr_wf_sig_only->SetName(gr_wf_sig_only_name_title.Data());
       wf->gen_WF( gr_wf, gr_wf_sig, gr_wf_sig_only, n_sig_pe, h1_photon_time);
-      wf->save_to_csv( gr_wf, gr_wf_sig, gr_wf_sig_only);
+      //wf->save_to_csv( gr_wf, gr_wf_sig, gr_wf_sig_only);
+      wfSim::get_Ampl_hist( gr_wf, h1_ampl);
+      wfSim::get_AmplLocalMax_hist( gr_wf, gr_wf_locMax, h1_amplLocMax);
+      wfSim::get_count_threshold_vs_rate( h1_amplLocMax, gr_threshold_counter, totalTime_in_s);
       gr_wf->Write();
+      gr_wf_locMax->Write();
       gr_wf_sig->Write();
       gr_wf_sig_only->Write();
     }
     //
     wf->getTemplate()->Write();
     h1_photon_time->Write();
+    h1_ampl->Write();
+    h1_amplLocMax->Write();
+    //
+    gr_threshold_counter->Write();
     //
     rootFile->Close();
   }
@@ -320,7 +337,7 @@ int main(int argc, char *argv[]){
       }
     }
     //
-    lee_wf->fit_LEE( grerr_filter, false);
+    lee_wf->fit_LEE( grerr_filter, true);
     grerr_filter->SetNameTitle("grerr_filter","grerr_filter");
     //
     TGraphErrors *grerr_filter_fit = new TGraphErrors();

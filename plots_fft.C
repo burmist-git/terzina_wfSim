@@ -62,6 +62,7 @@ Int_t plots_fft(){
   TLegend *leg = new TLegend(0.6,0.6,0.9,0.9,"","brNDC");
   leg->AddEntry(gr, "Initial", "pl");
   leg->AddEntry(gr_filter, "Frequency cut off", "pl");
+  leg->AddEntry(grerr_filter_fit, "Fit", "pl");
   leg->Draw();
   ///////////////////////
   return 0;

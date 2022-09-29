@@ -19,8 +19,8 @@ Int_t plots_template_comp(){
   TString fileN01;
   TString fileN02;
   //
-  fileN01 = "./wfData/linearExpExp_NUVHD_25um_conv.txt";
-  fileN02 = "./wfData/linearExpExp_NUVHD_35um_conv.txt";
+  fileN01 = "./wfData/linearExpExp_tau_260ns.txt";
+  fileN02 = "./wfData/linearExpExp_tau_260ns_fit_40MHz_filter.txt";
   //
   TGraph *gr01 = new TGraph();
   gr01->SetTitle("gr01");

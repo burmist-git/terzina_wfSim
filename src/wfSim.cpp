@@ -26,6 +26,42 @@ wfSim::wfSim(TRandom3 *rnd, wfSimConfStr *wfConf){
 wfSim::~wfSim(){
 }
 
+void wfSim::get_Ampl_hist(TGraph *wf, TH1D *h1){
+  Double_t t;
+  Double_t a;
+  for(Int_t i = 0;i<wf->GetN();i++){
+    wf->GetPoint(i,t,a);
+    h1->Fill(a);
+  }
+}
+
+void wfSim::get_AmplLocalMax_hist(TGraph *wf,  TGraph *gr_max, TH1D *h1){
+  Double_t t_l;
+  Double_t a_l;
+  Double_t t;
+  Double_t a;
+  Double_t t_r;
+  Double_t a_r;
+  Double_t delta_a_l;
+  Double_t delta_a_r;
+  for(Int_t i = 1;i<(wf->GetN()-1);i++){
+    //
+    wf->GetPoint(i-1,t_l,a_l);
+    wf->GetPoint(i,t,a);
+    wf->GetPoint(i+1,t_r,a_r);
+    //
+    delta_a_l = a - a_l;
+    delta_a_r = a - a_r;
+    //
+    if(delta_a_l>=0.0 && delta_a_r>=0.0){
+      if(a>0.0){
+	h1->Fill(a);
+	gr_max->SetPoint(gr_max->GetN(),t,a);
+      }
+    }
+  }
+}
+
 void wfSim::getWF_tmpl(TString name){
   std::ifstream fileIn(name.Data());
   double x;
@@ -128,6 +164,16 @@ void wfSim::print_pe_vec(const auto (&all_pe_vec)){
       all_pe_vec.at(i).at(j).printInfo();
     }
     std::cout<<std::endl;
+  }
+}
+
+void wfSim::get_count_threshold_vs_rate( TH1D *h1, TGraph *gr, Double_t totalTime_in_s){
+  Double_t threshold;
+  Double_t rate;
+  for(Int_t i = 1; i<=h1->GetNbinsX();i++){
+    threshold = h1->GetBinCenter(i);
+    rate = h1->Integral(i,(h1->GetNbinsX()+1))/totalTime_in_s;
+    gr->SetPoint(i-1,threshold,rate);
   }
 }
 

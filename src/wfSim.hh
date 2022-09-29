@@ -70,6 +70,9 @@ public :
   void simPE(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
   const inline TGraph *getTemplate() {return _gr_wf_tmpl;}
   void save_to_csv( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only);
+  static void get_Ampl_hist(TGraph *wf, TH1D *h1);
+  static void get_AmplLocalMax_hist(TGraph *wf, TGraph *gr_max, TH1D *h1);
+  static void get_count_threshold_vs_rate( TH1D *h1, TGraph *gr, Double_t totalTime_in_s);
   
 private:
   void crosstalk_sim(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
