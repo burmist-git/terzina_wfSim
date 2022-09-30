@@ -16,6 +16,13 @@
 #include <assert.h>
 #include <iomanip>
 
+wfSim::wfSim(){
+  _rnd = new TRandom3();
+  _gr_wf_tmpl = new TGraph();
+  _wfConf = new wfSimConfStr();
+  _t_max_ampl_wf_tmpl = -999.0;
+}
+
 wfSim::wfSim(TRandom3 *rnd, wfSimConfStr *wfConf){
   _rnd = rnd;
   _gr_wf_tmpl = new TGraph();
@@ -24,6 +31,9 @@ wfSim::wfSim(TRandom3 *rnd, wfSimConfStr *wfConf){
 }
 
 wfSim::~wfSim(){
+  delete _rnd;
+  delete _gr_wf_tmpl;
+  delete _wfConf;
 }
 
 void wfSim::get_Ampl_hist(TGraph *wf, TH1D *h1){

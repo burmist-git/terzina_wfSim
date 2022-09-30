@@ -60,6 +60,7 @@ struct photoElectronInfo {
 class wfSim {
 
 public :
+  wfSim();
   wfSim( TRandom3 *rnd, wfSimConfStr *wfConf);
   ~wfSim();
 
