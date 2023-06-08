@@ -17,6 +17,7 @@ function printHelp {
     echo " [0] -LEEfit                : fit with LEE function"
     echo " [0] -FREQCUTOFF            : simulate frequency cut off preamp."
     echo " [0] -genDistFromHist       : test GenerateDistFromHist"
+    echo " [0] -simtelarray_back      : simtelarray background"
     echo " [0] -h                     : print help"
 }
 
@@ -410,6 +411,29 @@ else
 	#trakInfoDescription="trkInfo_0000701.dat"                             # 25 km 750 PeV
 	n_sig_pe=7
 	./runterzina_wfSim 7 $input_configuration_file $outputRootFileWith_wf $numberOfWaveformsToSim $rnd_seed $n_sig_pe $inRootFileWithShower $trakInfoDescription
+    elif [ "$1" = "-simtelarray_back" ]; then
+	make clean; make;
+	simpath="/home/burmist/home2/work/CTA/terzina_wfSim"
+	inRootFileWithShower="./wfData_root/EASCherSim_0022360.ini.npz.root" # 7  km 100 PeV
+	trakInfoDescription="trkInfo_0022360.dat" # 7  km 100 PeV
+	numberOfWaveformsToSim=100
+	n_sig_pe=0
+	#
+	input_configuration_file="wfSim_simtelarray_sipm.conf"
+	outputRootFileWith_wf="wfSim_simtelarray_sipm.root"
+	rnd_seed=`date +%N`
+	screenName='lee01'
+	#screen -S $screenName -L -d -m $simpath/runterzina_wfSim 3 $input_configuration_file $outputRootFileWith_wf $numberOfWaveformsToSim $rnd_seed $n_sig_pe $inRootFileWithShower $trakInfoDescriptio
+	echo "input_configuration_file $input_configuration_file"
+	echo "outputRootFileWith_wf $outputRootFileWith_wf"
+	echo "numberOfWaveformsToSim $numberOfWaveformsToSim"
+	echo "rnd_seed $rnd_seed"
+	echo "n_sig_pe $n_sig_pe"
+	echo "inRootFileWithShower $inRootFileWithShower"
+	echo "trakInfoDescriptio $trakInfoDescriptio"
+	$simpath/runterzina_wfSim 3 $input_configuration_file $outputRootFileWith_wf $numberOfWaveformsToSim $rnd_seed $n_sig_pe $inRootFileWithShower $trakInfoDescription
+
+
     elif [ "$1" = "-h" ]; then
         printHelp
     else

@@ -217,8 +217,10 @@ int main(int argc, char *argv[]){
     TRandom3 *rnd = new TRandom3(rnd_seed);
     wfSim *wf = new wfSim(rnd,wfConf);
     wf->getWF_tmpl(wfConf->Template);
-    TH1D *h1_ampl = new TH1D("h1_ampl","h1_ampl",1000,0.0,20.0); 
-    TH1D *h1_amplLocMax = new TH1D("h1_amplLocMax","h1_amplLocMax",1000,0.0,20.0); 
+    TH1D *h1_ampl = new TH1D("h1_ampl","h1_ampl",1000,-50.0,200.0); 
+    TH1D *h1_v = new TH1D("h1_v","h1_v",400, -200.0, 200.0);
+    TH1D *h1_d_v = new TH1D("h1_d_v","h1_d_v",80, -40.0,40.0);
+    TH1D *h1_amplLocMax = new TH1D("h1_amplLocMax","h1_amplLocMax",1000,0.0,100.0); 
     TGraph *gr_threshold_counter = new TGraph();
     gr_threshold_counter->SetTitle("gr_threshold_counter");
     gr_threshold_counter->SetName("gr_threshold_counter");
@@ -259,6 +261,7 @@ int main(int argc, char *argv[]){
       wf->gen_WF( gr_wf, gr_wf_sig, gr_wf_sig_only, n_sig_pe, h1_photon_time);
       //wf->save_to_csv( gr_wf, gr_wf_sig, gr_wf_sig_only);
       wfSim::get_Ampl_hist( gr_wf, h1_ampl);
+      wfSim::get_v_dv_hist( gr_wf, h1_ampl, h1_v, h1_d_v);
       wfSim::get_AmplLocalMax_hist( gr_wf, gr_wf_locMax, h1_amplLocMax);
       wfSim::get_count_threshold_vs_rate( h1_amplLocMax, gr_threshold_counter, totalTime_in_s);
       gr_wf->Write();
@@ -268,9 +271,16 @@ int main(int argc, char *argv[]){
     }
     //
     wf->getTemplate()->Write();
+    wf->get_gr_wf_ampl()->Write();
+    wf->get_h1_wf_ampl()->Write();
+    wf->get_h1_first_pe_ampl()->Write();
+    //
     h1_photon_time->Write();
     h1_ampl->Write();
     h1_amplLocMax->Write();
+    //
+    h1_v->Write();
+    h1_d_v->Write();
     //
     gr_threshold_counter->Write();
     //

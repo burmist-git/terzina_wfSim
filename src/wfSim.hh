@@ -66,12 +66,19 @@ public :
 
 public :
   void getWF_tmpl(TString name);
+  void getWF_ampl(TString name, Double_t &Ampl_Prompt_max, Double_t &Prompt_max);
   void gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, unsigned int n_signals);
   void gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, unsigned int n_signals, TH1D *h1_photon_time);
   void simPE(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
+  //
   const inline TGraph *getTemplate() {return _gr_wf_tmpl;}
+  const inline TGraph *get_gr_wf_ampl() {return _gr_wf_ampl;}
+  const inline TH1D *get_h1_wf_ampl() {return _h1_wf_ampl;}
+  const inline TH1D *get_h1_first_pe_ampl() {return _h1_first_pe_ampl;} 
+  //
   void save_to_csv( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only);
   static void get_Ampl_hist(TGraph *wf, TH1D *h1);
+  static void get_v_dv_hist(TGraph *wf, TH1D *h1, TH1D *h1_v, TH1D *h1_d_v);
   static void get_AmplLocalMax_hist(TGraph *wf, TGraph *gr_max, TH1D *h1);
   static void get_count_threshold_vs_rate( TH1D *h1, TGraph *gr, Double_t totalTime_in_s);
   void testGenerateDistFromHist(TH1D *h1in,TH1D *h1out);
@@ -81,12 +88,21 @@ private:
   void afterpulse_sim(auto (&pe_vec), Double_t t, Double_t a, Int_t typeID, Int_t parentGenerationID, Int_t parentID, Double_t probabilityCorrectionFactor);
   void print_pe_vec(const auto (&all_pe_vec));
   double generateDistFromHist(TH1D *h1);
+  Double_t generate_wf_ampl_from_file();
   
   TRandom3 *_rnd;
   TGraph *_gr_wf_tmpl;
   Double_t _t_max_ampl_wf_tmpl;
   wfSimConfStr *_wfConf;
 
+  //
+  TGraph *_gr_wf_ampl;
+  TH1D *_h1_wf_ampl;
+  Double_t Ampl_Prompt_max;
+  Double_t Prompt_max;
+  //
+  TH1D *_h1_first_pe_ampl;
+  //
 };
 
 #endif

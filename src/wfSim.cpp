@@ -19,21 +19,63 @@
 wfSim::wfSim(){
   _rnd = new TRandom3();
   _gr_wf_tmpl = new TGraph();
+  _gr_wf_ampl = new TGraph();
+  _h1_wf_ampl = new TH1D();
   _wfConf = new wfSimConfStr();
   _t_max_ampl_wf_tmpl = -999.0;
+  //
+  _h1_first_pe_ampl = new TH1D();
+  _h1_first_pe_ampl->SetNameTitle("_h1_first_pe_ampl","_h1_first_pe_ampl");
 }
 
 wfSim::wfSim(TRandom3 *rnd, wfSimConfStr *wfConf){
   _rnd = rnd;
   _gr_wf_tmpl = new TGraph();
+  _gr_wf_ampl = new TGraph();
+  _h1_wf_ampl = new TH1D();
   _wfConf = wfConf;
   _t_max_ampl_wf_tmpl = -999.0;
+  //
+  _h1_first_pe_ampl = new TH1D("_h1_first_pe_ampl",
+			       "_h1_first_pe_ampl",1000,0.0,_wfConf->single_p_e_ampl*5.0);
+  //_h1_first_pe_ampl->SetNameTitle();
+  //
+  if(_wfConf->amplDistFile != "NONE"){
+    getWF_ampl(wfConf->amplDistFile,Ampl_Prompt_max,Prompt_max);
+  }
+  else{
+    Ampl_Prompt_max = 0.0;
+    Prompt_max = 0.0;
+    _gr_wf_ampl->SetNameTitle("_gr_wf_ampl","_gr_wf_ampl");
+    _h1_wf_ampl->SetNameTitle("_h1_wf_ampl","_h1_wf_ampl");
+  }
 }
 
 wfSim::~wfSim(){
   delete _rnd;
   delete _gr_wf_tmpl;
   delete _wfConf;
+  delete _gr_wf_ampl;
+  delete _h1_wf_ampl;
+}
+
+void wfSim::get_v_dv_hist(TGraph *wf, TH1D *h1, TH1D *h1_v, TH1D *h1_d_v){
+  Double_t t;
+  Double_t a;
+  Double_t t1;
+  Double_t a1;
+  Double_t t2;
+  Double_t a2;
+  Double_t mean_v = h1->GetMean();
+  for(Int_t i = 0;i<wf->GetN();i++){
+    wf->GetPoint(i,t,a);
+    h1_v->Fill(a-mean_v);
+    if(i>0){
+      wf->GetPoint(i-1,t1,a1);
+      wf->GetPoint(i,t2,a2);
+      h1_d_v->Fill(a2-a1);
+    }
+  }
 }
 
 void wfSim::get_Ampl_hist(TGraph *wf, TH1D *h1){
@@ -70,6 +112,50 @@ void wfSim::get_AmplLocalMax_hist(TGraph *wf,  TGraph *gr_max, TH1D *h1){
       }
     }
   }
+}
+
+void wfSim::getWF_ampl(TString name, Double_t &Ampl_Prompt_max, Double_t &Prompt_max){
+  //
+  _gr_wf_ampl->SetNameTitle("_gr_wf_ampl","_gr_wf_ampl");
+  _h1_wf_ampl->SetNameTitle("_h1_wf_ampl","_h1_wf_ampl");
+  //
+  std::cout<<name<<std::endl;
+  std::ifstream fFile(name.Data());
+  std::string mot;
+  Double_t Ampl;
+  Double_t Prompt;
+  Ampl_Prompt_max = 0.0;
+  Prompt_max = 0.0;
+  Double_t Prompt_x_AP;
+  Double_t Ampl_min;
+  Double_t Ampl_max;
+  Double_t d_Ampl;
+  //
+  if(fFile.is_open()){
+    while(fFile>>mot){
+      if(mot == "AP)")
+        break;
+    }
+    fFile>>mot>>mot>>mot>>mot;
+    while(fFile>>Ampl>>Prompt>>Prompt_x_AP){
+      _gr_wf_ampl->SetPoint(_gr_wf_ampl->GetN(),Ampl,Prompt);
+      if(Prompt_max<Prompt){
+        Prompt_max = Prompt;
+        Ampl_Prompt_max = Ampl;
+      }
+    }
+    fFile.close();
+  }
+  _gr_wf_ampl->GetPoint(0,Ampl_min,Prompt);
+  _gr_wf_ampl->GetPoint((_gr_wf_ampl->GetN()-1),Ampl_max,Prompt);
+  d_Ampl = (Ampl_max - Ampl_min)/(_gr_wf_ampl->GetN()-1);
+  //
+  _h1_wf_ampl->SetBins(_gr_wf_ampl->GetN(),Ampl_min-d_Ampl/2.0,Ampl_max+d_Ampl/2.0);
+  //
+  for(Int_t i = 0;i<_gr_wf_ampl->GetN();i++){
+    _gr_wf_ampl->GetPoint(i,Ampl,Prompt);
+    _h1_wf_ampl->SetBinContent(i+1,Prompt);
+  }  
 }
 
 void wfSim::getWF_tmpl(TString name){
@@ -187,6 +273,23 @@ void wfSim::get_count_threshold_vs_rate( TH1D *h1, TGraph *gr, Double_t totalTim
   }
 }
 
+Double_t wfSim::generate_wf_ampl_from_file(){
+  Double_t r_y;
+  Int_t    r_x;
+  if(Ampl_Prompt_max <= 0){
+    std::cout<<" ERROR--> : Ampl_Prompt_max <= 0 "<<std::endl
+	     <<"            Ampl_Prompt_max  =   "<<Ampl_Prompt_max<<std::endl;
+    assert(0);
+  }
+  while(1){
+    r_y=_rnd->Uniform(0.0,Prompt_max);
+    r_x=_rnd->Uniform(1,_h1_wf_ampl->GetNbinsX());
+    if(r_y<=_h1_wf_ampl->GetBinContent(r_x))
+      return _h1_wf_ampl->GetBinCenter(r_x)*_wfConf->single_p_e_ampl/Ampl_Prompt_max;
+  }
+  return 0.0;
+}
+
 void wfSim::gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, unsigned int n_signals, TH1D *h1_photon_time){
   //
   Double_t dT = (_wfConf->SimEndTime - _wfConf->SimStartTime);
@@ -207,7 +310,13 @@ void wfSim::gen_WF( TGraph *gr_wf, TGraph *gr_wf_sig, TGraph *gr_wf_sig_only, un
   for(unsigned int i = 0; i<n_noise; i++){
     std::vector<photoElectronInfo> pe_vec;
     first_pe_time = _rnd->Uniform(_wfConf->SimEndTime,_wfConf->SimStartTime);
-    first_pe_ampl = _rnd->Gaus(_wfConf->single_p_e_ampl,_wfConf->SigmaGain);
+    if(_wfConf->amplDistFile != "NONE"){
+      first_pe_ampl = generate_wf_ampl_from_file();
+    }
+    else{
+      first_pe_ampl = _rnd->Gaus(_wfConf->single_p_e_ampl,_wfConf->SigmaGain);
+    }
+    _h1_first_pe_ampl->Fill(first_pe_ampl);
     parentGenerationID = -1;
     parentID = -1;
     typeID = 0;

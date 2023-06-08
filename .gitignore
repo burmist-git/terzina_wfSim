@@ -193,3 +193,7 @@ wfData_root/EASCherSim_0022360.ini.npz_210ns_fit_40MHz_filter.root
 wfData_root/EASCherSim_0022360.ini.npz_230ns_fit_40MHz_filter.root
 wfData_root/EASCherSim_0022360.ini.npz_260ns_fit_40MHz_filter.root
 install.00.00.01
+wfSim_simtelarray_sipm_Rate_268MHz.root
+wfSim_simtelarray_sipm_Rate_268MHz_el_noise.root
+wfSim_simtelarray_sipm_Rate_386MHz.root
+wfSim_simtelarray_sipm_Rate_386MHz_el_noise.root

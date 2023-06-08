@@ -13,6 +13,7 @@
 struct wfSimConfStr {
   TString DetectorName;
   TString Template;
+  TString amplDistFile;
   Int_t Ncells;
   Double_t Vbd_V;
   Double_t Vbias;
@@ -40,6 +41,7 @@ struct wfSimConfStr {
   wfSimConfStr(){
     DetectorName = "";
     Template = "";
+    amplDistFile = "NONE";
     Ncells = -999;
     Vbd_V = -999.0;
     Vbias = -999.0;
@@ -68,6 +70,7 @@ struct wfSimConfStr {
   void printInfo(){
     std::cout<<"DetectorName        "<<DetectorName<<std::endl
 	     <<"Template            "<<Template<<std::endl
+      	     <<"amplDistFile        "<<amplDistFile<<std::endl
 	     <<"Ncells              "<<Ncells<<std::endl
 	     <<"Vbd_V               "<<Vbd_V<<std::endl
 	     <<"Vbias               "<<Vbias<<std::endl
@@ -102,6 +105,8 @@ struct wfSimConfStr {
 	  confFile>>DetectorName;
 	if(mot == "Template:")
 	  confFile>>Template;
+	if(mot == "amplDistFile:")
+	  confFile>>amplDistFile;
 	if(mot == "Ncells:")
 	  confFile>>Ncells;
 	if(mot == "Vbd_V:")
